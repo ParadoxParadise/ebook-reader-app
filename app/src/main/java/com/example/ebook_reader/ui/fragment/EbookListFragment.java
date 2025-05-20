@@ -143,7 +143,7 @@ public class EbookListFragment extends Fragment {
     }
 
     private void setupFilterSpinner() {
-        String[] filterOptions = {"All", "Fiction", "Non-Fiction", "PDF"};
+        String[] filterOptions = {"All", "Fiction", "Non-Fiction", "PDF", "Favorites"};
         ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, filterOptions);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         filterSpinner.setAdapter(spinnerAdapter);
@@ -164,6 +164,11 @@ public class EbookListFragment extends Fragment {
                         break;
                     case "PDF":
                         db.ebookDao().filterByFormat(selected).observe(getViewLifecycleOwner(), ebooks -> {
+                            adapter.setEbooks(ebooks);
+                        });
+                        break;
+                    case "Favorites":
+                        db.ebookDao().filterFavorites().observe(getViewLifecycleOwner(), ebooks -> {
                             adapter.setEbooks(ebooks);
                         });
                         break;

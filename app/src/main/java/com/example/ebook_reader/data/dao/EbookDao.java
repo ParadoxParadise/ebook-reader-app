@@ -1,7 +1,5 @@
 package com.example.ebook_reader.data.dao;
 
-
-
 import androidx.lifecycle.LiveData;
 import androidx.room.Dao;
 import androidx.room.Delete;
@@ -33,6 +31,9 @@ public interface EbookDao {
 
     @Query("SELECT * FROM ebooks WHERE format = :format")
     LiveData<List<Ebook>> filterByFormat(String format);
+
+    @Query("SELECT * FROM ebooks WHERE isFavorite = 1")
+    LiveData<List<Ebook>> filterFavorites();
 
     @Query("SELECT * FROM ebooks ORDER BY timestamp DESC")
     LiveData<List<Ebook>> getEbooksByDateAdded();
