@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/nav_auth">
+
+    <fragment
+        android:id="@+id/nav_auth"
+        android:name="com.example.ebook_reader.ui.fragment.AuthFragment"
+        android:label="Đăng Nhập">
+        <action
+            android:id="@+id/action_auth_to_ebook_list"
+            app:destination="@id/nav_ebook_list" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_ebook_list"
+        android:name="com.example.ebook_reader.ui.fragment.EbookListFragment"
+        android:label="Danh Sách Ebook">
+        <action
+            android:id="@+id/action_ebook_list_to_detail"
+            app:destination="@id/nav_ebook_detail" />
+        <action
+            android:id="@+id/action_ebook_list_to_reading"
+            app:destination="@id/nav_reading" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_history"
+        android:name="com.example.ebook_reader.ui.fragment.HistoryFragment"
+        android:label="Lịch Sử Đọc">
+        <action
+            android:id="@+id/action_history_to_reading"
+            app:destination="@id/nav_reading" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.example.ebook_reader.ui.fragment.UserProfileFragment"
+        android:label="Hồ Sơ" />
+
+    <fragment
+        android:id="@+id/nav_ebook_detail"
+        android:name="com.example.ebook_reader.ui.fragment.EbookDetailFragment"
+        android:label="Chi Tiết Ebook">
+        <action
+            android:id="@+id/action_detail_to_reading"
+            app:destination="@id/nav_reading" />
+        <action
+            android:id="@+id/action_detail_to_bookmark"
+            app:destination="@id/nav_bookmark" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_reading"
+        android:name="com.example.ebook_reader.ui.fragment.ReadingFragment"
+        android:label="Đọc">
+        <action
+            android:id="@+id/action_reading_to_bookmark"
+            app:destination="@id/nav_bookmark" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/nav_bookmark"
+        android:name="com.example.ebook_reader.ui.fragment.BookmarkFragment"
+        android:label="Đánh Dấu" />
+</navigation>

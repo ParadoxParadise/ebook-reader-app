@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">eBook Reader</string>
+    <string name="title_hint">Tiêu Đề</string>
+    <string name="author_hint">Tác Giả</string>
+    <string name="genre_hint">Thể Loại</string>
+    <string name="format_hint">Định Dạng</string>
+    <string name="read_button">Đọc</string>
+    <string name="favorite_button">Yêu Thích</string>
+    <string name="update_profile">Cập Nhật Hồ Sơ</string>
+</resources>
