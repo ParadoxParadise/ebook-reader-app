@@ -23,6 +23,9 @@
         <action
             android:id="@+id/action_ebook_list_to_reading"
             app:destination="@id/nav_reading" />
+        <action
+            android:id="@+id/action_ebook_list_to_profile"
+            app:destination="@id/nav_profile" />
     </fragment>
 
     <fragment
