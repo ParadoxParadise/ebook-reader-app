@@ -8,4 +8,9 @@
     <string name="read_button">Đọc</string>
     <string name="favorite_button">Yêu Thích</string>
     <string name="update_profile">Cập Nhật Hồ Sơ</string>
+    <string name="theme_change_message">Chủ đề sẽ được áp dụng khi khởi động lại</string>
+    <string-array name="background_colors">
+        <item>Light</item>
+        <item>Dark</item>
+    </string-array>
 </resources>

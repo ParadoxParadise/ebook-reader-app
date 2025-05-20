@@ -54,15 +54,18 @@ public class AuthFragment extends Fragment {
         }
 
         String passwordHash = AuthUtils.hashPassword(password);
+        android.util.Log.d("AuthFragment", "Login attempt - Email: " + email + ", Password: " + password + ", Hashed Password: " + passwordHash);
 
         new Thread(() -> {
             User user = db.userDao().authenticate(email, passwordHash);
             if (user != null) {
+                android.util.Log.d("AuthFragment", "Login successful - UID: " + user.uid + ", Stored Password Hash: " + user.passwordHash);
                 prefs.edit().putString("logged_in_user_id", user.uid).apply();
                 requireActivity().runOnUiThread(() ->
                         Navigation.findNavController(getView()).navigate(R.id.action_auth_to_ebook_list)
                 );
             } else {
+                android.util.Log.w("AuthFragment", "Login failed - No user found or password mismatch for Email: " + email);
                 requireActivity().runOnUiThread(() ->
                         Toast.makeText(getContext(), "Email hoặc mật khẩu không đúng", Toast.LENGTH_SHORT).show()
                 );
@@ -83,6 +86,7 @@ public class AuthFragment extends Fragment {
         new Thread(() -> {
             User existingUser = db.userDao().getUserByEmail(email);
             if (existingUser != null) {
+                android.util.Log.w("AuthFragment", "Registration failed - Email already used: " + email);
                 requireActivity().runOnUiThread(() ->
                         Toast.makeText(getContext(), "Email đã được sử dụng", Toast.LENGTH_SHORT).show()
                 );
@@ -93,7 +97,9 @@ public class AuthFragment extends Fragment {
             user.uid = AuthUtils.generateUid();
             user.name = name;
             user.email = email;
-            user.passwordHash = AuthUtils.hashPassword(password);
+            String passwordHash = AuthUtils.hashPassword(password);
+            user.passwordHash = passwordHash;
+            android.util.Log.d("AuthFragment", "Registering user - Email: " + email + ", Password: " + password + ", Hashed Password: " + passwordHash + ", UID: " + user.uid);
 
             db.userDao().insert(user);
 

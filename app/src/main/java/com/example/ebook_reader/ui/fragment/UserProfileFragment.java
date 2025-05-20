@@ -6,14 +6,12 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatDelegate;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -21,12 +19,13 @@ import androidx.lifecycle.ViewModel;
 import com.example.ebook_reader.R;
 import com.example.ebook_reader.data.database.AppDatabase;
 import com.example.ebook_reader.data.entity.User;
+import com.example.ebook_reader.util.AuthUtils;
 
 public class UserProfileFragment extends Fragment {
     private TextView nameTextView;
     private TextView emailTextView;
-    private Spinner themeSpinner;
     private Button updateButton;
+    private Button changePasswordButton;
     private SharedPreferences prefs;
     private UserProfileViewModel viewModel;
 
@@ -36,8 +35,8 @@ public class UserProfileFragment extends Fragment {
 
         nameTextView = view.findViewById(R.id.name_text);
         emailTextView = view.findViewById(R.id.email_text);
-        themeSpinner = view.findViewById(R.id.theme_spinner);
         updateButton = view.findViewById(R.id.update_button);
+        changePasswordButton = view.findViewById(R.id.change_password_button);
         prefs = getContext().getSharedPreferences("auth_prefs", Context.MODE_PRIVATE);
 
         viewModel = new UserProfileViewModel(getContext());
@@ -63,8 +62,6 @@ public class UserProfileFragment extends Fragment {
             android.util.Log.w("UserProfile", "UID is null");
         }
 
-        setupThemeSpinner();
-
         updateButton.setOnClickListener(v -> {
             if (viewModel.getUser().getValue() == null) {
                 Toast.makeText(getContext(), "Không có dữ liệu người dùng để cập nhật", Toast.LENGTH_SHORT).show();
@@ -88,24 +85,51 @@ public class UserProfileFragment extends Fragment {
             builder.show();
         });
 
-        return view;
-    }
-
-    private void setupThemeSpinner() {
-        String[] themes = {"Sáng", "Tối"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(), android.R.layout.simple_spinner_item, themes);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        themeSpinner.setAdapter(adapter);
-        themeSpinner.setSelection(prefs.getInt("theme", 0));
-        themeSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                prefs.edit().putInt("theme", position).apply();
-                Toast.makeText(getContext(), "Chủ đề sẽ được áp dụng khi khởi động lại", Toast.LENGTH_SHORT).show();
+        changePasswordButton.setOnClickListener(v -> {
+            if (viewModel.getUser().getValue() == null) {
+                Toast.makeText(getContext(), "Không có dữ liệu người dùng để đổi mật khẩu", Toast.LENGTH_SHORT).show();
+                return;
             }
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
+            AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+            builder.setTitle("Đổi Mật Khẩu");
+            View dialogView = inflater.inflate(R.layout.dialog_change_password, null);
+            EditText newPasswordInput = dialogView.findViewById(R.id.new_password_input);
+            builder.setView(dialogView);
+            builder.setPositiveButton("Lưu", (dialog, which) -> {
+                String newPassword = newPasswordInput.getText().toString().trim();
+                if (newPassword.isEmpty()) {
+                    Toast.makeText(getContext(), "Mật khẩu không được để trống", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                User updatedUser = viewModel.getUser().getValue();
+                String oldPassword = updatedUser.passwordHash;
+                // Mã hóa mật khẩu mới trước khi lưu
+                String hashedNewPassword = AuthUtils.hashPassword(newPassword);
+                updatedUser.passwordHash = hashedNewPassword;
+                new Thread(() -> {
+                    // Cập nhật mật khẩu trong cơ sở dữ liệu
+                    AppDatabase.getInstance(getContext()).userDao().update(updatedUser);
+
+                    // Truy vấn lại dữ liệu để kiểm tra
+                    User userAfterUpdate = AppDatabase.getInstance(getContext()).userDao().getUserById(updatedUser.uid);
+                    if (userAfterUpdate != null && userAfterUpdate.passwordHash.equals(hashedNewPassword)) {
+                        getActivity().runOnUiThread(() -> {
+                            Toast.makeText(getContext(), "Đổi mật khẩu thành công", Toast.LENGTH_SHORT).show();
+                            android.util.Log.d("UserProfile", "Password updated successfully. Old: " + oldPassword + ", New: " + userAfterUpdate.passwordHash);
+                        });
+                    } else {
+                        getActivity().runOnUiThread(() -> {
+                            Toast.makeText(getContext(), "Đổi mật khẩu thất bại", Toast.LENGTH_SHORT).show();
+                            android.util.Log.e("UserProfile", "Password update failed. Expected: " + hashedNewPassword + ", Found: " + (userAfterUpdate != null ? userAfterUpdate.passwordHash : "null"));
+                        });
+                    }
+                }).start();
+            });
+            builder.setNegativeButton("Hủy", null);
+            builder.show();
         });
+
+        return view;
     }
 
     public static class UserProfileViewModel extends ViewModel {
